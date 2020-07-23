@@ -24,43 +24,49 @@ module.exports = app => {
     return context.github.issues.createComment(prComment)
   })
   app.on('pull_request.reopened' , async context => {
-    var prComment
-    var diff_url = context.payload.pull_request.diff_url
-    //if ('Jenkinsfile' in changed_files){
-      //prComment = context.issue({ body: 'Change detected in the Jenkinsfile' })
-    //} else {
-     // prComment =  context.issue({ body: 'Normal Change' })
-   // }
-    // var parseDiff = require("parse-diff")
-    // var fetchUrl = require("fetch").fetchUrl;
     
-    // fetchUrl(diff_url, function(error, meta, body){
-    // //console.log("response", body.toString());
-    // var files = parseDiff(body.toString());
-    // console.log(files)
-    // files.forEach(function(file) {
-    //   console.log(file.from); // number of hunks
-    //   //console.log(file.chunks[0].changes.length) // hunk added/deleted/context lines
-    // // each item in changes is a string
-    //   //console.log(file.deletions); // number of deletions in the patch
-    //   //console.log(file.additions); // number of additions in the patch
-    //   });
-    //   prComment = context.issue({ body: files })
-      
-    //   //return context.github.issues.createComment(prComment)
-    // });
-    prComment = context.issue({ body: 'Pull Request is reopened' })
-    
-    
-    // context.github.pulls.createReviewRequest(
-    //   context.issue ({
-    //     reviewers: ['Kevin-Mok']
-    //   })
-    // )
-    
-    context.github.issues.addLabels(context.issue({
-            labels: ['needs review']
-          }))
-    return context.github.issues.createComment(prComment)
+    await filterFilesandComment(context)
+    // context.github.issues.addLabels(context.issue({
+    //         labels: ['needs review']
+    //       }))
   })
+
+
+
+  async function filterFilesandComment(context){
+    const paths = await context.config("config.yml")
+    var changed_files = new Set()
+    const parser = require("git-diff-parser");
+    var fetchUrl = require("fetch").fetchUrl;
+  
+    fetchUrl(context.payload.pull_request.diff_url, function(error, meta, body){
+    const diff  = parser(body.toString());
+    diff.commits.forEach(function(commit){
+      commit.files.forEach(function(file){
+        changed_files.add(file.name)
+      })
+    })
+
+   // for (let i in triggerFileConfig.files){
+     // console.log(i)
+      // if (changed_files.has(i)){
+      //   return context.github.issues.createComment(context.issue({ body: "I'll trigger Jenkins now"}))
+      // }
+   // }
+    // triggerFileConfig.files.forEach(function(file){
+    //   if(changed_files.has(file)){
+    //     prComment = conext.issue({ body: "Change detected in files location, needs to trigger the Jenkins job for the PR"});
+    //     break;
+    //   } else {
+    //     prComment = context.issue({ body: "Well thank you for your PR, Congrats no need to run that Jenkins job"})
+    //   }
+    // })
+    // if(changed_files.has('Jenkinsfile')){
+    //   prComment = context.issue({ body: "Change is detected in the Jenkinsfile" })
+    // } else {
+    //   prComment = context.issue({ body: "Well congrats you didn't change anything in Jenkinsfile" })
+    // }
+    return context.github.issues.createComment(context.issue({ body: paths.toString()}))
+    });
+  }
 }

@@ -22,6 +22,7 @@
   },
   "dependencies": {
     "fetch": "^1.1.0",
+    "git-diff-parser": "^1.0.0",
     "parse-diff": "^0.7.0",
     "probot": "^9.5.3"
   },

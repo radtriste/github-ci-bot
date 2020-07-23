@@ -1,0 +1,35 @@
+---
+# Describe the labels that once added to a pull request cause the app to assign
+# randomly chosen reviewers.
+labels:
+  -
+    # Define the groups of reviewers from which the reviewers will be chosen. In this
+    # example, when the label `ready-for-review` is applied, two reviewers are
+    # chosen from the first group and one reviewer from the second group.
+    groups:
+      -
+        number_of_picks: 2
+        possible_reviewers:
+          - florian
+          - erika
+          - octobot
+          - mathilda
+          - james
+          - cx-3po
+      -
+        number_of_picks: 1
+        possible_reviewers:
+          - romain
+          - maria
+          - amal
+          - ana
+    label: "ready-for-review"
+  -
+    groups:
+      -
+        number_of_picks: 1
+        possible_reviewers:
+          - foo
+          - bar
+          - baz
+    label: "Ready for review - small"
