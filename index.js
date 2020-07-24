@@ -8,8 +8,9 @@ module.exports = app => {
   app.on('pull_request.opened' , async context => {
     const yaml = require('js-yaml');
     const fs   = require('fs');
+    const comments = await yaml.safeLoad(fs.readFileSync('comments.yml', 'utf8'));
     if (await isFirstPR(context)){
-      context.github.issues.createComment(context.issue({body: "Welcome to the PR section, thank you for making your first contribution in the Repository"}))
+      context.github.issues.createComment(context.issue({body: comments.prFirstTimeContributor}))
     }
 
     const trigger_paths =  await yaml.safeLoad(fs.readFileSync('paths.yml', 'utf8'));
@@ -26,7 +27,12 @@ module.exports = app => {
   // })
 
   app.on('pull_request.edited' , async context => {
-    context.github.issues.createComment(context.issue({ body: "Pull request edited checking..."}))
+    const yaml = require('js-yaml');
+    const fs   = require('fs');
+    const comments = await yaml.safeLoad(fs.readFileSync('comments.yml', 'utf8'));
+
+    context.github.issues.createComment(context.issue({ body: comments.prEdit}))
+
     const trigger_paths =  await yaml.safeLoad(fs.readFileSync('paths.yml', 'utf8'));
     const allReviewersList = await yaml.safeLoad(fs.readFileSync('reviewers.yml', 'utf8'));
     await askReview(context, allReviewersList.reviewers)
@@ -45,33 +51,37 @@ module.exports = app => {
     
     const yaml = require('js-yaml');
     const fs   = require('fs');
-    //if (await isFirstPR(context)){
-      //context.github.issues.createComment(context.issue({body: "Welcome to the PR section, thank you for making your first contribution in the Repository"}))
-    //}
-
+    const comments = await yaml.safeLoad(fs.readFileSync('comments.yml', 'utf8'));
+    context.github.issues.createComment(context.issue({ body: comments.prReopen}))
     const trigger_paths =  await yaml.safeLoad(fs.readFileSync('paths.yml', 'utf8'));
     const allReviewersList = await yaml.safeLoad(fs.readFileSync('reviewers.yml', 'utf8'));
+    
     await askReview(context, allReviewersList.reviewers)
-    await filterFilesandComment(context, trigger_paths)
+    if (await ifCIRequired(context, trigger_paths)){
+      context.github.issues.createComment(context.issue({ body: comments.prCiTrigger}))
+    }
+    //await filterFilesandComment(context, trigger_paths)
     await addLabels(context)
   })
 
+}
 
-  async function filterFilesandComment(context, trigger_paths){
-    let prComment = ''
-    let changed_files = await getChangedFiles(context)
- 
-    prComment = 'No need to run the pipeline for this'
-    trigger_paths.files.forEach(path =>{
-        for (let changed of changed_files){
-            if(changed.match("^".concat(path))){
-              prComment = 'Need to run the pipeline here'
-              break;
-            }
-        }
-    })
-    return context.github.issues.createComment(context.issue({ body: prComment}))
 
+async function ifCIRequired(context, trigger_paths){
+  let require = 0
+  let changed_files = await getChangedFiles(context)
+  trigger_paths.files.forEach(path =>{
+      for (let changed of changed_files){
+          if(changed.match("^".concat(path))){
+            require = require + 1
+            break;
+          }
+      }
+  })
+  if (require > 0){
+    return true
+  } else {
+    return false
   }
 }
 
