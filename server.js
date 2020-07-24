@@ -16,15 +16,11 @@ module.exports = app => {
     const trigger_paths =  await yaml.safeLoad(fs.readFileSync('paths.yml', 'utf8'));
     const allReviewersList = await yaml.safeLoad(fs.readFileSync('reviewers.yml', 'utf8'));
     await askReview(context, allReviewersList.reviewers)
-    await filterFilesandComment(context, trigger_paths)
     await addLabels(context)
+    if (await ifCIRequired(context, trigger_paths)){
+      context.github.issues.createComment(context.issue({ body: comments.prCiTrigger}))
+    }
   })
-  // app.on('pull_request' , async context => {
-  //   context.payload.pull_request.user.
-  //   if (context.payload.pull_request.draft){
-  //     context.github.issues.createComment(context.issue({body: "PR converted to draft I'll remove the needs review label now"}))
-  //   } 
-  // })
 
   app.on('pull_request.edited' , async context => {
     const yaml = require('js-yaml');
@@ -36,8 +32,10 @@ module.exports = app => {
     const trigger_paths =  await yaml.safeLoad(fs.readFileSync('paths.yml', 'utf8'));
     const allReviewersList = await yaml.safeLoad(fs.readFileSync('reviewers.yml', 'utf8'));
     await askReview(context, allReviewersList.reviewers)
-    await filterFilesandComment(context, trigger_paths)
     await addLabels(context)
+    if (await ifCIRequired(context, trigger_paths)){
+      context.github.issues.createComment(context.issue({ body: comments.prCiTrigger}))
+    }
   })
 
 
@@ -56,16 +54,15 @@ module.exports = app => {
     const trigger_paths =  await yaml.safeLoad(fs.readFileSync('paths.yml', 'utf8'));
     const allReviewersList = await yaml.safeLoad(fs.readFileSync('reviewers.yml', 'utf8'));
     
-    await askReview(context, allReviewersList.reviewers)
+    
     if (await ifCIRequired(context, trigger_paths)){
       context.github.issues.createComment(context.issue({ body: comments.prCiTrigger}))
     }
-    //await filterFilesandComment(context, trigger_paths)
+    await askReview(context, allReviewersList.reviewers)
     await addLabels(context)
   })
 
 }
-
 
 async function ifCIRequired(context, trigger_paths){
   let require = 0
