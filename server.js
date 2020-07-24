@@ -9,6 +9,7 @@ module.exports = app => {
     const yaml = require('js-yaml');
     const fs   = require('fs');
     const comments = await yaml.safeLoad(fs.readFileSync('comments.yml', 'utf8'));
+    const labels = await yaml.safeLoad(fs.readFileSync('labels.yml', 'utf8'));
     if (await isFirstPR(context)){
       context.github.issues.createComment(context.issue({body: comments.prFirstTimeContributor}))
     }
@@ -16,7 +17,7 @@ module.exports = app => {
     const trigger_paths =  await yaml.safeLoad(fs.readFileSync('paths.yml', 'utf8'));
     const allReviewersList = await yaml.safeLoad(fs.readFileSync('reviewers.yml', 'utf8'));
     await askReview(context, allReviewersList.reviewers)
-    await addLabels(context)
+    await addLabels(context, labels.open)
     if (await ifCIRequired(context, trigger_paths)){
       context.github.issues.createComment(context.issue({ body: comments.prCiTrigger}))
     }
@@ -26,13 +27,13 @@ module.exports = app => {
     const yaml = require('js-yaml');
     const fs   = require('fs');
     const comments = await yaml.safeLoad(fs.readFileSync('comments.yml', 'utf8'));
-
+    const labels = await yaml.safeLoad(fs.readFileSync('labels.yml', 'utf8'));
     context.github.issues.createComment(context.issue({ body: comments.prEdit}))
 
     const trigger_paths =  await yaml.safeLoad(fs.readFileSync('paths.yml', 'utf8'));
     const allReviewersList = await yaml.safeLoad(fs.readFileSync('reviewers.yml', 'utf8'));
     await askReview(context, allReviewersList.reviewers)
-    await addLabels(context)
+    await addLabels(context, labels.edited)
     if (await ifCIRequired(context, trigger_paths)){
       context.github.issues.createComment(context.issue({ body: comments.prCiTrigger}))
     }
@@ -50,6 +51,7 @@ module.exports = app => {
     const yaml = require('js-yaml');
     const fs   = require('fs');
     const comments = await yaml.safeLoad(fs.readFileSync('comments.yml', 'utf8'));
+    const labels = await yaml.safeLoad(fs.readFileSync('labels.yml', 'utf8'));
     context.github.issues.createComment(context.issue({ body: comments.prReopen}))
     const trigger_paths =  await yaml.safeLoad(fs.readFileSync('paths.yml', 'utf8'));
     const allReviewersList = await yaml.safeLoad(fs.readFileSync('reviewers.yml', 'utf8'));
@@ -59,7 +61,7 @@ module.exports = app => {
       context.github.issues.createComment(context.issue({ body: comments.prCiTrigger}))
     }
     await askReview(context, allReviewersList.reviewers)
-    await addLabels(context)
+    await addLabels(context, labels.reopen)
   })
 
 }
@@ -112,9 +114,9 @@ async function askReview(context, reviewersList){
   )
 }
 
-async function addLabels(context){
+async function addLabels(context, labelsToAdd){
   context.github.issues.addLabels(context.issue({
-    labels: ['needs review']
+    labels: labelsToAdd
   }))
 }
 

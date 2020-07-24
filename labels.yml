@@ -1,0 +1,10 @@
+## used for defining the labels to put on PR on various events
+
+open:
+  - needs review
+
+reopen:
+  - needs review
+
+edited:
+  - needs review
