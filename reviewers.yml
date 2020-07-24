@@ -1,0 +1,7 @@
+---
+## define the list of reviewers here that will be asked to review the PR once it opened or changed
+# Please right the username, it is case sensitive so please right exactly the username on github
+#
+reviewers:
+ - Kaitou786
+ - Kevin-Mok

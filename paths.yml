@@ -1,0 +1,16 @@
+---
+#Inside the files list, mention the file name or the directory name inside which if anything changes
+#pipeline needs to be run.
+#for now we don't have support for wild cards
+#though you can define the entire directories or sub-directories to ignore
+# for eg: to trigger on change in /pkg/hack/ directory just add that to the list below
+
+files:
+  - Jenkinsfile
+  - test/
+  - cmd/
+  - pkg/
+    # Define the groups of reviewers from which the reviewers will be chosen. In this
+    # example, when the label `ready-for-review` is applied, two reviewers are
+    # chosen from the first group and one reviewer from the second group.
+  

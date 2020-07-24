@@ -3,70 +3,123 @@
  * @param {import('probot').Application} app
  */
 module.exports = app => {
-  // Your code here
-  app.log('Yay, the app was loaded!')
+
+
   app.on('pull_request.opened' , async context => {
-    //const prComment = context.issue({ body: 'Thanks for opening the pull request!' })
-    const changed_files = context.payload.pull_request.changed_files
-    if (1 == changed_files){
-      const prComment = context.issue({ body: 'Change detected in the Jenkinsfile' })
-    } else {
-      const prComment = context.issue({ body: 'Thanks for making the PR' })
+    const yaml = require('js-yaml');
+    const fs   = require('fs');
+    if (await isFirstPR(context)){
+      context.github.issues.createComment(context.issue({body: "Welcome to the PR section, thank you for making your first contribution in the Repository"}))
     }
-    return context.github.issues.createComment(prComment)
+
+    const trigger_paths =  await yaml.safeLoad(fs.readFileSync('paths.yml', 'utf8'));
+    const allReviewersList = await yaml.safeLoad(fs.readFileSync('reviewers.yml', 'utf8'));
+    await askReview(context, allReviewersList.reviewers)
+    await filterFilesandComment(context, trigger_paths)
+    await addLabels(context)
   })
+  // app.on('pull_request' , async context => {
+  //   context.payload.pull_request.user.
+  //   if (context.payload.pull_request.draft){
+  //     context.github.issues.createComment(context.issue({body: "PR converted to draft I'll remove the needs review label now"}))
+  //   } 
+  // })
+
   app.on('pull_request.edited' , async context => {
-    const prComment = context.issue({ body: 'Pull Request is edited, meed to run the integration tests again' })
-    return context.github.issues.createComment(prComment)
+    context.github.issues.createComment(context.issue({ body: "Pull request edited checking..."}))
+    const trigger_paths =  await yaml.safeLoad(fs.readFileSync('paths.yml', 'utf8'));
+    const allReviewersList = await yaml.safeLoad(fs.readFileSync('reviewers.yml', 'utf8'));
+    await askReview(context, allReviewersList.reviewers)
+    await filterFilesandComment(context, trigger_paths)
+    await addLabels(context)
   })
+
+
   app.on('pull_request.closed' , async context => {
     const prComment = context.issue({ body: 'Pull Request is closed' })
     return context.github.issues.createComment(prComment)
   })
+
+
   app.on('pull_request.reopened' , async context => {
     
-    await filterFilesandComment(context)
-    // context.github.issues.addLabels(context.issue({
-    //         labels: ['needs review']
-    //       }))
+    const yaml = require('js-yaml');
+    const fs   = require('fs');
+    //if (await isFirstPR(context)){
+      //context.github.issues.createComment(context.issue({body: "Welcome to the PR section, thank you for making your first contribution in the Repository"}))
+    //}
+
+    const trigger_paths =  await yaml.safeLoad(fs.readFileSync('paths.yml', 'utf8'));
+    const allReviewersList = await yaml.safeLoad(fs.readFileSync('reviewers.yml', 'utf8'));
+    await askReview(context, allReviewersList.reviewers)
+    await filterFilesandComment(context, trigger_paths)
+    await addLabels(context)
   })
 
 
-
-  async function filterFilesandComment(context){
-    const paths = await context.config("config.yml")
-    var changed_files = new Set()
-    const parser = require("git-diff-parser");
-    var fetchUrl = require("fetch").fetchUrl;
-  
-    fetchUrl(context.payload.pull_request.diff_url, function(error, meta, body){
-    const diff  = parser(body.toString());
-    diff.commits.forEach(function(commit){
-      commit.files.forEach(function(file){
-        changed_files.add(file.name)
-      })
+  async function filterFilesandComment(context, trigger_paths){
+    let prComment = ''
+    let changed_files = await getChangedFiles(context)
+ 
+    prComment = 'No need to run the pipeline for this'
+    trigger_paths.files.forEach(path =>{
+        for (let changed of changed_files){
+            if(changed.match("^".concat(path))){
+              prComment = 'Need to run the pipeline here'
+              break;
+            }
+        }
     })
+    return context.github.issues.createComment(context.issue({ body: prComment}))
 
-   // for (let i in triggerFileConfig.files){
-     // console.log(i)
-      // if (changed_files.has(i)){
-      //   return context.github.issues.createComment(context.issue({ body: "I'll trigger Jenkins now"}))
-      // }
-   // }
-    // triggerFileConfig.files.forEach(function(file){
-    //   if(changed_files.has(file)){
-    //     prComment = conext.issue({ body: "Change detected in files location, needs to trigger the Jenkins job for the PR"});
-    //     break;
-    //   } else {
-    //     prComment = context.issue({ body: "Well thank you for your PR, Congrats no need to run that Jenkins job"})
-    //   }
-    // })
-    // if(changed_files.has('Jenkinsfile')){
-    //   prComment = context.issue({ body: "Change is detected in the Jenkinsfile" })
-    // } else {
-    //   prComment = context.issue({ body: "Well congrats you didn't change anything in Jenkinsfile" })
-    // }
-    return context.github.issues.createComment(context.issue({ body: paths.toString()}))
-    });
+  }
+}
+
+async function getChangedFiles(context){
+  let changed_files = new Set()
+  const parser = require("git-diff-parser");
+  const fetch = require("node-fetch");
+  const response =  await fetch(context.payload.pull_request.diff_url);
+  const diff  = parser(await response.text());
+  for (let commit of diff.commits){
+        for (let file of commit.files){
+          changed_files.add(file.name.toString())
+        }
+      }
+
+  return changed_files;
+}
+
+async function getPossibleReviewers(context, reviewersList){
+  const pullRequestAuthor = context.payload.pull_request.user.login
+  availableReviewers = reviewersList.filter(reviewer => reviewer != pullRequestAuthor)
+  return availableReviewers
+}
+
+async function askReview(context, reviewersList){
+  let availableReviewers = await getPossibleReviewers(context, reviewersList);
+  context.github.pulls.createReviewRequest(
+    context.issue ({
+      reviewers: availableReviewers
+    })
+  )
+}
+
+async function addLabels(context){
+  context.github.issues.addLabels(context.issue({
+    labels: ['needs review']
+  }))
+}
+
+async function isFirstPR(context){
+  const respone = await context.github.issues.listForRepo(context.repo({
+    state: 'all',
+    creator: context.payload.pull_request.user.login
+  }))
+  const countPR = respone.data.filter(data => data.pull_request);
+  if (countPR.length === 1){
+    return true
+  } else {
+    return false
   }
 }
