@@ -1,10 +1,17 @@
 ## used for defining the labels to put on PR on various events
 
-open:
-  - needs review
-
-reopen:
-  - needs review
-
-edited:
+allLabels:
+  - paths:
+     - cmd/
+    label:
+      - cli
+  - paths:
+      - pkg/
+    label:
+      - operator
+  - paths:
+      - test/
+    label:
+      - bdd test
+default:
   - needs review

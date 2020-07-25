@@ -61,7 +61,7 @@ module.exports = app => {
       context.github.issues.createComment(context.issue({ body: comments.prCiTrigger}))
     }
     await askReview(context, allReviewers)
-    await addLabels(context, labels.reopen)
+    await addLabels(context, labels)
   })
 
 }
@@ -104,13 +104,10 @@ async function getPossibleReviewers(context, allReviewers){
   let default_reviewers = allReviewers.default
   let changed_files = await getChangedFiles(context)
   for (let index in allReviewers.review){
-    console.log(allReviewers.review[index]['paths'])
     allReviewers.review[index]['paths'].forEach(path => {
       changed_files.forEach(file =>{
         if (file.match(path)){
-          console.log("needs to add the reviewers here :-) for the path")
           allReviewers.review[index]['reviewers'].forEach(reviewer => {
-            console.log("adding to the set")
             path_reviewers.add(reviewer)
           })
         }
@@ -133,10 +130,31 @@ async function askReview(context, allReviewers){
   )
 }
 
-async function addLabels(context, labelsToAdd){
+async function addLabels(context, labels){
+  let labelsToAdd = await getRequiredLables(context, labels)
   context.github.issues.addLabels(context.issue({
     labels: labelsToAdd
   }))
+}
+
+async function getRequiredLables(context, labels){
+  let path_labels = new Set()
+  let default_label = labels.default
+  let changed_files = await getChangedFiles(context)
+  for(let index in labels.allLabels){
+    labels.allLabels[index]['paths'].forEach(path => {
+      changed_files.forEach(file =>{
+        if (file.match(path)){
+          labels.allLabels[index]['label'].forEach(label => {
+            path_labels.add(label)
+          })
+        }
+      })
+    })
+  }
+  path_labels = Array.from(path_labels)
+  let labelsToAdd = default_label.concat(path_labels)
+  return labelsToAdd
 }
 
 async function isFirstPR(context){
