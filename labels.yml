@@ -13,5 +13,9 @@ allLabels:
       - test/
     label:
       - bdd test
+  - paths:
+      - Jenkinsfile
+    label:
+      - CI/CD
 default:
   - needs review

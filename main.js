@@ -17,7 +17,7 @@ module.exports = app => {
     const trigger_paths =  await yaml.safeLoad(fs.readFileSync('paths.yml', 'utf8'));
     const allReviewers = await yaml.safeLoad(fs.readFileSync('reviewers.yml', 'utf8'));
     await askReview(context, allReviewers)
-    await addLabels(context, labels.open)
+    await addLabels(context, labels)
     if (await ifCIRequired(context, trigger_paths)){
       context.github.issues.createComment(context.issue({ body: comments.prCiTrigger}))
     }
@@ -33,7 +33,7 @@ module.exports = app => {
     const trigger_paths =  await yaml.safeLoad(fs.readFileSync('paths.yml', 'utf8'));
     const allReviewers = await yaml.safeLoad(fs.readFileSync('reviewers.yml', 'utf8'));
     await askReview(context, allReviewers)
-    await addLabels(context, labels.edited)
+    await addLabels(context, labels)
     if (await ifCIRequired(context, trigger_paths)){
       context.github.issues.createComment(context.issue({ body: comments.prCiTrigger}))
     }
