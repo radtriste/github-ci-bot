@@ -15,8 +15,8 @@ module.exports = app => {
     }
 
     const trigger_paths =  await yaml.safeLoad(fs.readFileSync('paths.yml', 'utf8'));
-    const allReviewersList = await yaml.safeLoad(fs.readFileSync('reviewers.yml', 'utf8'));
-    await askReview(context, allReviewersList.reviewers)
+    const allReviewers = await yaml.safeLoad(fs.readFileSync('reviewers.yml', 'utf8'));
+    await askReview(context, allReviewers)
     await addLabels(context, labels.open)
     if (await ifCIRequired(context, trigger_paths)){
       context.github.issues.createComment(context.issue({ body: comments.prCiTrigger}))
@@ -31,8 +31,8 @@ module.exports = app => {
     context.github.issues.createComment(context.issue({ body: comments.prEdit}))
 
     const trigger_paths =  await yaml.safeLoad(fs.readFileSync('paths.yml', 'utf8'));
-    const allReviewersList = await yaml.safeLoad(fs.readFileSync('reviewers.yml', 'utf8'));
-    await askReview(context, allReviewersList.reviewers)
+    const allReviewers = await yaml.safeLoad(fs.readFileSync('reviewers.yml', 'utf8'));
+    await askReview(context, allReviewers)
     await addLabels(context, labels.edited)
     if (await ifCIRequired(context, trigger_paths)){
       context.github.issues.createComment(context.issue({ body: comments.prCiTrigger}))
@@ -54,13 +54,13 @@ module.exports = app => {
     const labels = await yaml.safeLoad(fs.readFileSync('labels.yml', 'utf8'));
     context.github.issues.createComment(context.issue({ body: comments.prReopen}))
     const trigger_paths =  await yaml.safeLoad(fs.readFileSync('paths.yml', 'utf8'));
-    const allReviewersList = await yaml.safeLoad(fs.readFileSync('reviewers.yml', 'utf8'));
+    const allReviewers = await yaml.safeLoad(fs.readFileSync('reviewers.yml', 'utf8'));
     
     
     if (await ifCIRequired(context, trigger_paths)){
       context.github.issues.createComment(context.issue({ body: comments.prCiTrigger}))
     }
-    await askReview(context, allReviewersList.reviewers)
+    await askReview(context, allReviewers)
     await addLabels(context, labels.reopen)
   })
 
@@ -99,14 +99,33 @@ async function getChangedFiles(context){
   return changed_files;
 }
 
-async function getPossibleReviewers(context, reviewersList){
+async function getPossibleReviewers(context, allReviewers){
+  let path_reviewers = new Set()
+  let default_reviewers = allReviewers.default
+  let changed_files = await getChangedFiles(context)
+  for (let index in allReviewers.review){
+    console.log(allReviewers.review[index]['paths'])
+    allReviewers.review[index]['paths'].forEach(path => {
+      changed_files.forEach(file =>{
+        if (file.match(path)){
+          console.log("needs to add the reviewers here :-) for the path")
+          allReviewers.review[index]['reviewers'].forEach(reviewer => {
+            console.log("adding to the set")
+            path_reviewers.add(reviewer)
+          })
+        }
+      })
+    })
+  }
+  path_reviewers = Array.from(path_reviewers)
+  let reviewersList = default_reviewers.concat(path_reviewers)
   const pullRequestAuthor = context.payload.pull_request.user.login
   availableReviewers = reviewersList.filter(reviewer => reviewer != pullRequestAuthor)
   return availableReviewers
 }
 
-async function askReview(context, reviewersList){
-  let availableReviewers = await getPossibleReviewers(context, reviewersList);
+async function askReview(context, allReviewers){
+  let availableReviewers = await getPossibleReviewers(context, allReviewers);
   context.github.pulls.createReviewRequest(
     context.issue ({
       reviewers: availableReviewers
