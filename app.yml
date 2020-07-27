@@ -86,7 +86,7 @@ default_permissions:
 
   # Manage the post-receive hooks for a repository.
   # https://developer.github.com/v3/apps/permissions/#permission-on-repository-hooks
- repository_hooks: write
+  repository_hooks: write
 
   # Manage repository projects, columns, and cards.
   # https://developer.github.com/v3/apps/permissions/#permission-on-repository-projects
@@ -94,15 +94,15 @@ default_permissions:
 
   # Retrieve security vulnerability alerts.
   # https://developer.github.com/v4/object/repositoryvulnerabilityalert/
- vulnerability_alerts: read
+  vulnerability_alerts: read
 
   # Commit statuses.
   # https://developer.github.com/v3/apps/permissions/#permission-on-statuses
- statuses: read
+  statuses: read
 
   # Organization members and teams.
   # https://developer.github.com/v3/apps/permissions/#permission-on-members
- members: read
+  members: read
 
   # View and manage users blocked by the organization.
   # https://developer.github.com/v3/apps/permissions/#permission-on-organization-user-blocking
