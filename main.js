@@ -5,12 +5,12 @@
 module.exports = app => {
   app.on('pull_request.opened' , async context => {
     const comments = await context.config('bot-files/comments.yml')
-    if (await isFirstPR(context)){
+    if (await firstPR(context)){
       context.github.issues.createComment(context.issue({body: comments.prFirstTimeContributor}))
     }
     await askReview(context)
     await addLabels(context)
-    if (await ifCIRequired(context)){
+    if (await CIRequired(context)){
       context.github.issues.createComment(context.issue({ body: comments.prCiTrigger}))
     }
   })
@@ -20,7 +20,7 @@ module.exports = app => {
     context.github.issues.createComment(context.issue({ body: comments.prEdit}))
     await askReview(context)
     await addLabels(context)
-    if (await ifCIRequired(context)){
+    if (await CIRequired(context)){
       context.github.issues.createComment(context.issue({ body: comments.prCiTrigger}))
     }
   })
@@ -36,14 +36,14 @@ module.exports = app => {
     
      const comments = await context.config('bot-files/comments.yml')
      context.github.issues.createComment(context.issue({ body: comments.prReopen}))
-     if (await ifCIRequired(context)){
+     if (await CIRequired(context)){
        context.github.issues.createComment(context.issue({ body: comments.prCiTrigger}))
      }
      await askReview(context)
      await addLabels(context)
   })
 
-  async function ifCIRequired(context){
+  async function CIRequired(context){
     const trigger_paths =  await context.config('bot-files/paths.yml') 
     let require = 0
     let changed_files = await getChangedFiles(context)
@@ -137,7 +137,7 @@ module.exports = app => {
     return labelsToAdd
   }
   
-  async function isFirstPR(context){
+  async function firstPR(context){
     const respone = await context.github.issues.listForRepo(context.repo({
       state: 'all',
       creator: context.payload.pull_request.user.login
