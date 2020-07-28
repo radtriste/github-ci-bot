@@ -1,8 +1,11 @@
 ---
 ## define the list of reviewers here that will be asked to review the PR once it opened or changed
 # Please right the username, it is case sensitive so please right exactly the username on github
-#
-
+# The review element defines the list with paths and reviewers list inside.
+# it'll help to define which reviewers to ask when a PR changes any file in the given path.
+# the other element default is used to define the default reviewers which will be asked to review for every PR.
+# Unfortunately currently we don't support glob expressions to define the path.
+# # please see the example for the file below
 review:
   - paths:
       - cmd/
