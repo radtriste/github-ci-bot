@@ -1,15 +1,15 @@
 ---
-#Inside the files list, mention the file name or the directory name inside which if anything changes
-#pipeline needs to be run.
-#for now we don't have support for glob
-#though you can define the entire directories or sub-directories to ignore
-# for eg: to trigger on change in /pkg/hack/ directory just add that to the list below
+# Inside the files list, mention the file name or the directory name inside which if anything changes
+# pipeline needs to be run.
+# Paths can be specified as glob patterns
 # please see the example for the file below
 
 files:
   - Jenkinsfile
-  - test/
-  - cmd/
-  - pkg/
+  - test/**
+  - cmd/**
+  - pkg/**
+
+  #other example can be test/**/*.yml
    
   

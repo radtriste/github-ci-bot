@@ -4,13 +4,14 @@
  */
 module.exports = app => {
   app.on('pull_request.opened' , async context => {
+    let globToRegExp = require('glob-to-regexp');
     const comments = await context.config('bot-files/comments.yml')
     if (await firstPR(context)){
       context.github.issues.createComment(context.issue({body: comments.prFirstTimeContributor}))
     }
     await askReview(context)
     await addLabels(context)
-    if (await CIRequired(context)){
+    if (await CIRequired(context, globToRegExp)){
       context.github.issues.createComment(context.issue({ body: comments.prCiTrigger}))
     }
   })
@@ -33,32 +34,31 @@ module.exports = app => {
 
 
   app.on('pull_request.reopened' , async context => {
-    
+     let globToRegExp = require('glob-to-regexp');
      const comments = await context.config('bot-files/comments.yml')
      context.github.issues.createComment(context.issue({ body: comments.prReopen}))
-     if (await CIRequired(context)){
+     if (await CIRequired(context, globToRegExp)){
        context.github.issues.createComment(context.issue({ body: comments.prCiTrigger}))
      }
-     await askReview(context)
-     await addLabels(context)
+     await askReview(context, globToRegExp)
+     await addLabels(context, globToRegExp)
   })
 
-  async function CIRequired(context){
+  async function CIRequired(context, globToRegExp){
     const trigger_paths =  await context.config('bot-files/paths.yml') 
     let require = 0
     let changed_files = await getChangedFiles(context)
-    trigger_paths.files.forEach(path =>{
-        for (let changed of changed_files){
-            if(changed.match("^".concat(path))){
-              require = require + 1
-              break;
-            }
+    for (let path of trigger_paths.files){
+      let re = globToRegExp(path)
+      for (let file of changed_files){
+        if (re.test(file)){
+          require = require + 1
+          break;
         }
-    })
-    if (require > 0){
-      return true
-    } else {
-      return false
+        if (require > 0){
+          return true
+        }
+      }
     }
   }
   
@@ -77,20 +77,21 @@ module.exports = app => {
     return changed_files;
   }
   
-  async function getPossibleReviewers(context, allReviewers){
+  async function getPossibleReviewers(context, allReviewers, globToRegExp){
     let path_reviewers = new Set()
     let default_reviewers = allReviewers.default
     let changed_files = await getChangedFiles(context)
     for (let index in allReviewers.review){
-      allReviewers.review[index]['paths'].forEach(path => {
-        changed_files.forEach(file =>{
-          if (file.match(path)){
+      for (let path of allReviewers.review[index]['paths']){
+        let re = globToRegExp(path)
+        for (let file of changed_files){
+          if (re.test(file)){
             allReviewers.review[index]['reviewers'].forEach(reviewer => {
               path_reviewers.add(reviewer)
             })
           }
-        })
-      })
+        }
+      }
     }
     path_reviewers = Array.from(path_reviewers)
     let reviewersList = default_reviewers.concat(path_reviewers)
@@ -99,9 +100,9 @@ module.exports = app => {
     return availableReviewers
   }
   
-  async function askReview(context){
+  async function askReview(context, globToRegExp){
     const allReviewers = await context.config('bot-files/reviewers.yml')
-    let availableReviewers = await getPossibleReviewers(context, allReviewers);
+    let availableReviewers = await getPossibleReviewers(context, allReviewers, globToRegExp);
     context.github.pulls.createReviewRequest(
       context.issue ({
         reviewers: availableReviewers
@@ -109,28 +110,38 @@ module.exports = app => {
     )
   }
   
-  async function addLabels(context){
+  async function addLabels(context, globToRegExp){
     const labels = await context.config('bot-files/labels.yml')
-    let labelsToAdd = await getRequiredLables(context, labels)
+    let labelsToAdd = await getRequiredLables(context, labels, globToRegExp)
     context.github.issues.addLabels(context.issue({
       labels: labelsToAdd
     }))
   }
   
-  async function getRequiredLables(context, labels){
+  async function getRequiredLables(context, labels, globToRegExp){
     let path_labels = new Set()
     let default_label = labels.default
     let changed_files = await getChangedFiles(context)
     for(let index in labels.allLabels){
-      labels.allLabels[index]['paths'].forEach(path => {
-        changed_files.forEach(file =>{
-          if (file.match(path)){
+      // labels.allLabels[index]['paths'].forEach(path => {
+      //   changed_files.forEach(file =>{
+      //     if (file.match(path)){
+      //       labels.allLabels[index]['label'].forEach(label => {
+      //         path_labels.add(label)
+      //       })
+      //     }
+      //   })
+      // })
+      for (let path of labels.allLabels[index]['paths']){
+        let re = globToRegExp(path)
+        for (let file of changed_files){
+          if (re.test(file)){
             labels.allLabels[index]['label'].forEach(label => {
-              path_labels.add(label)
-            })
+                      path_labels.add(label)
+                    })
           }
-        })
-      })
+        }
+      }
     }
     path_labels = Array.from(path_labels)
     let labelsToAdd = default_label.concat(path_labels)

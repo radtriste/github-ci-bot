@@ -4,17 +4,16 @@
 # The review element defines the list with paths and reviewers list inside.
 # it'll help to define which reviewers to ask when a PR changes any file in the given path.
 # the other element default is used to define the default reviewers which will be asked to review for every PR.
-# Unfortunately currently we don't support glob expressions to define the path.
 # # please see the example for the file below
 review:
   - paths:
-      - cmd/
-      - pkg/
+      - cmd/**
+      - pkg/**
     reviewers:
       - Kaitou786
       - Kevin-Mok
   - paths:
-      - test/
+      - test/**
     reviewers:
       - Kaitou786
   - paths:
