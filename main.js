@@ -9,19 +9,20 @@ module.exports = app => {
     if (await firstPR(context)){
       context.github.issues.createComment(context.issue({body: comments.prFirstTimeContributor}))
     }
-    await askReview(context)
-    await addLabels(context)
+    await askReview(context, globToRegExp)
+    await addLabels(context, globToRegExp)
     if (await CIRequired(context, globToRegExp)){
       context.github.issues.createComment(context.issue({ body: comments.prCiTrigger}))
     }
   })
 
   app.on('pull_request.edited' , async context => {
+    let globToRegExp = require('glob-to-regexp');
     const comments = await context.config('bot-files/comments.yml')
     context.github.issues.createComment(context.issue({ body: comments.prEdit}))
-    await askReview(context)
-    await addLabels(context)
-    if (await CIRequired(context)){
+    await askReview(context, globToRegExp)
+    await addLabels(context, globToRegExp)
+    if (await CIRequired(context, globToRegExp)){
       context.github.issues.createComment(context.issue({ body: comments.prCiTrigger}))
     }
   })
