@@ -1,13 +1,13 @@
 {
-  "name": "my-ci-bot",
+  "name": "github-ci-bot",
   "version": "1.0.0",
-  "private": true,
+  "private": false,
   "description": "A Probot app",
   "author": "Tarun Khandelwal <tarkhand@redhat.com>",
   "license": "ISC",
-  "repository": "https://github.com/Kaitou786/my-ci-bot.git",
-  "homepage": "https://github.com/Kaitou786/my-ci-bot",
-  "bugs": "https://github.com/Kaitou786/my-ci-bot/issues",
+  "repository": "https://github.com/kiegroup/github-ci-bot.git",
+  "homepage": "https://github.com/kiegroup/github-ci-bot",
+  "bugs": "https://issues.redhat.com",
   "keywords": [
     "probot",
     "github",
@@ -15,10 +15,11 @@
   ],
   "scripts": {
     "dev": "nodemon",
-    "start": "probot run ./main.js",
+    "start": "probot run ./bin/main.js",
     "lint": "standard --fix",
     "test": "jest && standard",
-    "test:watch": "jest --watch --notify --notifyMode=change --coverage"
+    "test:watch": "jest --watch --notify --notifyMode=change --coverage",
+    "locktt": "locktt"
   },
   "dependencies": {
     "fetch": "^1.1.0",
@@ -34,7 +35,8 @@
     "nock": "^12.0.0",
     "nodemon": "^2.0.0",
     "smee-client": "^1.1.0",
-    "standard": "^14.3.1"
+    "standard": "^14.3.1",
+    "lock-treatment-tool": "^0.4.1"
   },
   "engines": {
     "node": ">= 8.3.0"
