@@ -1,35 +1,35 @@
-const globToRegExp = require('glob-to-regexp');
-const { getChangedFiles } = require("./utils");
+const globToRegExp = require('glob-to-regexp')
+const { getChangedFiles } = require('./utils')
 
-async function addLabels(context) {
-    const labels = await context.config('bot-files/labels.yml');
-    let labelsToAdd = await getRequiredLables(context, labels);
-    context.github.issues.addLabels(context.issue({
-        labels: labelsToAdd
-    }));
+async function addLabels (context) {
+  const labels = await context.config('bot-files/labels.yml')
+  const labelsToAdd = await getRequiredLables(context, labels)
+  context.github.issues.addLabels(context.issue({
+    labels: labelsToAdd
+  }))
 }
 
-async function getRequiredLables(context, labels) {
-    let path_labels = new Set();
-    let default_label = labels.default;
-    let changed_files = await getChangedFiles(context);
-    for (let index in labels.allLabels) {
-        for (let path of labels.allLabels[index]['paths']) {
-            let re = globToRegExp(path);
-            for (let file of changed_files) {
-                if (re.test(file)) {
-                    labels.allLabels[index]['label'].forEach(label => {
-                        path_labels.add(label);
-                    });
-                }
-            }
+async function getRequiredLables (context, labels) {
+  let pathLabels = new Set()
+  const defaultLabel = labels.default
+  const changedFiles = await getChangedFiles(context)
+  for (const index in labels.allLabels) {
+    for (const path of labels.allLabels[index].paths) {
+      const re = globToRegExp(path)
+      for (const file of changedFiles) {
+        if (re.test(file)) {
+          labels.allLabels[index].label.forEach(label => {
+            pathLabels.add(label)
+          })
         }
+      }
     }
-    path_labels = Array.from(path_labels);
-    let labelsToAdd = default_label.concat(path_labels);
-    return labelsToAdd;
+  }
+  pathLabels = Array.from(pathLabels)
+  const labelsToAdd = defaultLabel.concat(pathLabels)
+  return labelsToAdd
 }
 
 module.exports = {
-    addLabels
-};
+  addLabels
+}
