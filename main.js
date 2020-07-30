@@ -11,14 +11,21 @@ module.exports = app => {
     if (await firstPR(context)){
       context.github.issues.createComment(context.issue({body: comments.prFirstTimeContributor}))
     }
+    if (context.payload.pull_request.draft){
+      context.github.issues.createComment(context.issue({body: "looks like you opened a draft PR"}))
+    }
     await askReview(context)
     await addLabels(context)
     if (await CIRequired(context)){
       context.github.issues.createComment(context.issue({ body: comments.prCiTrigger}))
     }
   })
+  
+  // app.on('pull_request', async context =>{
+  //   context.github.issues.createComment(context.issue({ body: context.github.pulls.listFiles.toString() }))
+  // })
 
-  app.on('pull_request.edited' , async context => {
+  app.on(['pull_request.edited', 'pull_request.synchronize'] , async context => {
     const comments = await context.config('bot-files/comments.yml')
     context.github.issues.createComment(context.issue({ body: comments.prEdit}))
     await askReview(context)
