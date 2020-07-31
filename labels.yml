@@ -5,7 +5,7 @@
 
 labels:
   - paths:
-     - cmd/**
+      - cmd/**
     labels:
       - cli
   - paths:

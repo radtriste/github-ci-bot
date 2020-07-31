@@ -9,7 +9,4 @@ files:
   - test/**
   - cmd/**
   - pkg/**
-
   #other example can be test/**/*.yml
-   
-  
