@@ -1,4 +1,4 @@
-# my-ci-bot
+# kie-github-ci-bot
 
 > A GitHub App built with [Probot](https://github.com/probot/probot) that A Probot app
 
@@ -9,17 +9,18 @@ my-ci-bot is a simple bot which was created to automate few tasks done manually 
 - Comment on the PR on different events.
 - Trigger your jenkins pipeline if change in specified files.
 
-You need to create 4 files for this bot to work properly.
+You need to create 4 files for this bot to work properly. For example on how to define these files please checkout the file which has more description.
 
-- labels.yml
-- comments.yml
-- reviewers.yml
-- paths.yml
+- [labels.yml](docs/labels.yml)
+- [comments.yml](docs/comments.yml)
+- [reviewers.yml](docs/reviewers.yml)
+- [paths.yml](docs/paths.yml)
 
-For example on how to define these files please see each file is present in this project's root with more description.
 You'll need to have these files inside `.github/bot-files/` directory in your project
 
 ## Setup
+
+**Note**: node v12.18.0++ is required for this project.
 
 ```sh
 # Install dependencies
@@ -28,6 +29,7 @@ npm install
 # Run the bot
 npm start
 ```
+**Note**: On the initial setup the bot creates a `.env` file in your project root which has all the secrets and webhook required for your bot to work with github. However you can create that file yourself. For that please see an example for the [file](docs/.env.example)
 
 ## Contributing
 
