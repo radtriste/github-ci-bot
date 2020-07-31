@@ -1,6 +1,11 @@
 const globToRegExp = require("glob-to-regexp");
 const { getChangedFiles } = require("./utils");
 
+/**
+ * checks if we need to run the Jenkins job(based to trigger only on comment) and comment the required phrase, which is defined in comments.yml
+ * @param {string} context - The context from which the PR is coming from
+ * @returns {boolean} true/false depending on the method logic
+ */
 async function isCIRequired(context) {
   const triggerPaths = await context.config("bot-files/paths.yml");
   const changedFiles = await getChangedFiles(context);

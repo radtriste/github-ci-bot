@@ -1,6 +1,10 @@
 const globToRegExp = require("glob-to-regexp");
 const { getChangedFiles } = require("./utils");
 
+/**
+ * driver function to ask for reviews on the PR, gets all the required reviewers(defined in reviewers.yml) relevant to PR by getPossibleReviewers.
+ * @param {string} context The context from which the PR is coming from
+ */
 async function askToReview(context) {
   const reviewersInfo = await context.config("bot-files/reviewers.yml");
   context.github.pulls.createReviewRequest(
@@ -9,7 +13,12 @@ async function askToReview(context) {
     })
   );
 }
-
+/**
+ * Calculates all the required reviewers needed for the PR and return them as an Array
+ * @param {string} context The context from which the PR is coming from
+ * @param {Object} reviewersInfo The parsed yaml defined in reviewers.yml
+ * @returns {Array} All the required reviewers
+ */
 async function getPossibleReviewers(context, reviewersInfo) {
   const changedFiles = await getChangedFiles(context);
   const pathReviewersSet = reviewersInfo.review
