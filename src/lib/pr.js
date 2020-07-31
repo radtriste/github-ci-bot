@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 /**
  * checks wheather the PR is the first contribution by the author, in the target repository.
  * @param {string} context The context from which the PR is coming from
