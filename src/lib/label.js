@@ -1,33 +1,20 @@
 const globToRegExp = require('glob-to-regexp')
 const { getChangedFiles } = require('./utils')
 
-async function addLabels (context) {
-  const labels = await context.config('bot-files/labels.yml')
-  const labelsToAdd = await getRequiredLables(context, labels)
+async function addLabels(context) {
+  const labelsInfo = await context.config('bot-files/labels.yml')
   context.github.issues.addLabels(context.issue({
-    labels: labelsToAdd
+    labels: await getRequiredLables(context, labelsInfo)
   }))
 }
 
-async function getRequiredLables (context, labels) {
-  let pathLabels = new Set()
-  const defaultLabel = labels.default
+async function getRequiredLables(context, labelsInfo) {
   const changedFiles = await getChangedFiles(context)
-  for (const index in labels.allLabels) {
-    for (const path of labels.allLabels[index].paths) {
-      const re = globToRegExp(path)
-      for (const file of changedFiles) {
-        if (re.test(file)) {
-          labels.allLabels[index].label.forEach(label => {
-            pathLabels.add(label)
-          })
-        }
-      }
-    }
-  }
-  pathLabels = Array.from(pathLabels)
-  const labelsToAdd = defaultLabel.concat(pathLabels)
-  return labelsToAdd
+  const pathLabelsSet = labelsInfo.labels
+    .filter(labelPath => labelPath.paths.map(path => globToRegExp(path)).find(re => changedFiles.find(file => re.test(file))))
+    .flatMap(pathLabel => pathLabel.labels)
+    .reduce((acc, label) => acc.add(label), new Set())
+  return labelsInfo.default.concat(Array.from(pathLabelsSet))
 }
 
 module.exports = {

@@ -3,22 +3,22 @@
 # follows the same pattern as reviewers.yml.
 # please see the example for the file below
 
-allLabels:
+labels:
   - paths:
      - cmd/**
-    label:
+    labels:
       - cli
   - paths:
       - pkg/**
-    label:
+    labels:
       - operator
   - paths:
       - test/**
-    label:
+    labels:
       - bdd test
   - paths:
       - Jenkinsfile
-    label:
+    labels:
       - CI/CD
 default:
   - needs review
