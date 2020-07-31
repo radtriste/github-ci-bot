@@ -15,10 +15,10 @@ async function getPossibleReviewers(context, reviewersInfo) {
   const pathReviewersSet = reviewersInfo.review
     .filter(reviewPath => reviewPath.paths.map(path => globToRegExp(path)).find(re => changedFiles.find(file => re.test(file))))
     .flatMap(pathReview => pathReview.reviewers)
-    .filter(reviewer => reviewer !== context.payload.pull_request.user.login)
     .reduce((acc, reviewer) => acc.add(reviewer), new Set());
 
-  return reviewersInfo.default.concat(Array.from(pathReviewersSet));
+  return reviewersInfo.default.concat(Array.from(pathReviewersSet))
+    .filter(reviewer => reviewer !== context.payload.pull_request.user.login);
 }
 
 module.exports = {

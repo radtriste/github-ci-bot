@@ -2,7 +2,7 @@ const review = require('../src/lib/review');
 jest.mock('../src/lib/utils');
 const { getChangedFiles: getChangedFilesMock } = require('../src/lib/utils');
 
-const reviewers = { default: ['default1', 'default2'], review: [{ paths: ['test/**', 'cmd/**'], reviewers: ['rw-a', 'rw-b'] }, { paths: ['packg/**'], reviewers: ['rw-c', 'rw-d'] }, { paths: ['packg2/**'], reviewers: ['rw-e', 'login'] }] };
+const reviewers = { default: ['default1', 'default2', 'login'], review: [{ paths: ['test/**', 'cmd/**'], reviewers: ['rw-a', 'rw-b'] }, { paths: ['packg/**'], reviewers: ['rw-c', 'rw-d'] }, { paths: ['packg2/**'], reviewers: ['rw-e', 'login'] }] };
 
 test('askToReview default reviewers', async () => {
   // Arrange
