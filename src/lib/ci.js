@@ -6,9 +6,14 @@ const { getChangedFiles } = require("./utils");
  * @param {string} context - The context from which the PR is coming from
  * @returns {boolean} true/false depending on the method logic
  */
+<<<<<<< HEAD
 
 async function isCIRequired(context) {
   const triggerPaths = await context.config("bot-files/paths.yml");
+=======
+async function isCIRequired (context) {
+  const triggerPaths = await context.config('bot-files/paths.yml');
+>>>>>>> review comments
   const changedFiles = await getChangedFiles(context);
 
   return (

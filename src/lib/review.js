@@ -16,7 +16,7 @@ async function askToReview(context) {
 /**
  * Calculates all the required reviewers needed for the PR and return them as an Array
  * @param {string} context The context from which the PR is coming from
- * @param {yaml} reviewersInfo The parsed yaml defined in reviewers.yml
+ * @param {Object} reviewersInfo The parsed yaml defined in reviewers.yml
  * @returns {Array} All the required reviewers
  */
 async function getPossibleReviewers(context, reviewersInfo) {

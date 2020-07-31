@@ -17,7 +17,7 @@ async function addLabels(context) {
 /**
  * Calculates all the required labels needed to add to the PR.
  * @param {string} context The context from which the PR is coming from
- * @param {yaml} labelsInfo - The parsed yaml defined in labels.yml
+ * @param {Object} labelsInfo - The parsed yaml defined in labels.yml
  * @returns {Array} labels to add.
  */
 async function getRequiredLables(context, labelsInfo) {
