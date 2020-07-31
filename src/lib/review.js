@@ -2,7 +2,7 @@ const globToRegExp = require("glob-to-regexp");
 const { getChangedFiles } = require("./utils");
 
 /**
- * driver function to ask for reviews on the PR, gets all the required reviewers(defined in reviewers.yml) relevant to PR by getPossibleReviewers 
+ * driver function to ask for reviews on the PR, gets all the required reviewers(defined in reviewers.yml) relevant to PR by getPossibleReviewers.
  * @param {string} context The context from which the PR is coming from
  */
 async function askToReview(context) {

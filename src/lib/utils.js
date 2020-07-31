@@ -2,7 +2,7 @@ const parser = require("git-diff-parser");
 const fetch = require("node-fetch");
 /**
  * calculates all the files which are changed in the PR
- * @param {string} context The context from which the PR is coming from 
+ * @param {string} context The context from which the PR is coming from
  * @returns {Array} array of all the changed files
  */
 async function getChangedFiles(context) {
