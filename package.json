@@ -1,5 +1,5 @@
 {
-  "name": "kie-ci-bot",
+  "name": "kie-github-ci-bot",
   "version": "1.0.0",
   "private": false,
   "description": "A Probot app",
