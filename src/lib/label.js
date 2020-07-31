@@ -1,6 +1,10 @@
 const globToRegExp = require("glob-to-regexp");
 const { getChangedFiles } = require("./utils");
 
+/**
+ * driver function to add the labels, uses getRequiredLabels to get all required labels needed to add to the PR.
+ * @param {string} context - The context from which the PR is coming from
+ */
 async function addLabels(context) {
   const labelsInfo = await context.config("bot-files/labels.yml");
   context.github.issues.addLabels(
@@ -10,6 +14,12 @@ async function addLabels(context) {
   );
 }
 
+/**
+ * Calculates all the required labels needed to add to the PR.
+ * @param {string} context The context from which the PR is coming from
+ * @param {yaml} labelsInfo - The parsed yaml defined in labels.yml
+ * @returns {Array} labels to add.
+ */
 async function getRequiredLables(context, labelsInfo) {
   const changedFiles = await getChangedFiles(context);
   const pathLabelsSet = labelsInfo.labels
