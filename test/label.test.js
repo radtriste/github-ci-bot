@@ -1,61 +1,97 @@
-const label = require('../src/lib/label');
-jest.mock('../src/lib/utils');
-const { getChangedFiles: getChangedFilesMock } = require('../src/lib/utils');
+const label = require("../src/lib/label");
+jest.mock("../src/lib/utils");
+const { getChangedFiles: getChangedFilesMock } = require("../src/lib/utils");
 
-const labels = { default: ['default1', 'default2'], labels: [{ paths: ['test/**', 'cmd/**'], labels: ['lbl-a', 'lbl-b'] }, { paths: ['packg/**'], labels: ['lbl-c', 'lbl-d'] }] };
+const labels = {
+  default: ["default1", "default2"],
+  labels: [
+    { paths: ["test/**", "cmd/**"], labels: ["lbl-a", "lbl-b"] },
+    { paths: ["packg/**"], labels: ["lbl-c", "lbl-d"] }
+  ]
+};
 
-test('addLabels default reviewers', async () => {
+test("addLabels default reviewers", async () => {
   // Arrange
   const context = createContext(labels);
-  getChangedFilesMock.mockImplementationOnce(cntxt => cntxt === context ? ['otherfolder/file-a'] : undefined);
+  getChangedFilesMock.mockImplementationOnce(cntxt =>
+    cntxt === context ? ["otherfolder/file-a"] : undefined
+  );
   // Act
   await label.addLabels(context);
   // Assert
   expect(context.issue.mock.calls.length).toBe(1);
-  expect(context.issue.mock.calls[0][0]).toStrictEqual({ 'labels': ['default1', 'default2'] });
+  expect(context.issue.mock.calls[0][0]).toStrictEqual({
+    labels: ["default1", "default2"]
+  });
   expect(context.github.issues.addLabels.mock.calls.length).toBe(1);
-  expect(context.github.issues.addLabels.mock.calls[0][0]).toStrictEqual('issue');
+  expect(context.github.issues.addLabels.mock.calls[0][0]).toStrictEqual(
+    "issue"
+  );
 });
 
-test('addLabels label one file existing in path but the other', async () => {
+test("addLabels label one file existing in path but the other", async () => {
   // Arrange
   const context = createContext(labels);
-  getChangedFilesMock.mockImplementationOnce(cntxt => cntxt === context ? ['test/file-a', 'filex'] : undefined);
+  getChangedFilesMock.mockImplementationOnce(cntxt =>
+    cntxt === context ? ["test/file-a", "filex"] : undefined
+  );
   // Act
   await label.addLabels(context);
   // Assert
   expect(context.issue.mock.calls.length).toBe(1);
-  expect(context.issue.mock.calls[0][0]).toStrictEqual({ 'labels': ['default1', 'default2', 'lbl-a', 'lbl-b'] });
+  expect(context.issue.mock.calls[0][0]).toStrictEqual({
+    labels: ["default1", "default2", "lbl-a", "lbl-b"]
+  });
   expect(context.github.issues.addLabels.mock.calls.length).toBe(1);
-  expect(context.github.issues.addLabels.mock.calls[0][0]).toStrictEqual('issue');
+  expect(context.github.issues.addLabels.mock.calls[0][0]).toStrictEqual(
+    "issue"
+  );
 });
 
-test('addLabels label both files existing in path', async () => {
+test("addLabels label both files existing in path", async () => {
   // Arrange
   const context = createContext(labels);
-  getChangedFilesMock.mockImplementationOnce(cntxt => cntxt === context ? ['test/file-a', 'cmd/filex'] : undefined);
+  getChangedFilesMock.mockImplementationOnce(cntxt =>
+    cntxt === context ? ["test/file-a", "cmd/filex"] : undefined
+  );
   // Act
   await label.addLabels(context);
   // Assert
   expect(context.issue.mock.calls.length).toBe(1);
-  expect(context.issue.mock.calls[0][0]).toStrictEqual({ 'labels': ['default1', 'default2', 'lbl-a', 'lbl-b'] });
+  expect(context.issue.mock.calls[0][0]).toStrictEqual({
+    labels: ["default1", "default2", "lbl-a", "lbl-b"]
+  });
   expect(context.github.issues.addLabels.mock.calls.length).toBe(1);
-  expect(context.github.issues.addLabels.mock.calls[0][0]).toStrictEqual('issue');
+  expect(context.github.issues.addLabels.mock.calls[0][0]).toStrictEqual(
+    "issue"
+  );
 });
 
-test('addLabels label both files existing in different paths', async () => {
+test("addLabels label both files existing in different paths", async () => {
   // Arrange
   const context = createContext(labels);
-  getChangedFilesMock.mockImplementationOnce(cntxt => cntxt === context ? ['test/file-a', 'packg/filex'] : undefined);
+  getChangedFilesMock.mockImplementationOnce(cntxt =>
+    cntxt === context ? ["test/file-a", "packg/filex"] : undefined
+  );
   // Act
   await label.addLabels(context);
   // Assert
   expect(context.issue.mock.calls.length).toBe(1);
-  expect(context.issue.mock.calls[0][0]).toStrictEqual({ 'labels': ['default1', 'default2', 'lbl-a', 'lbl-b', 'lbl-c', 'lbl-d'] });
+  expect(context.issue.mock.calls[0][0]).toStrictEqual({
+    labels: ["default1", "default2", "lbl-a", "lbl-b", "lbl-c", "lbl-d"]
+  });
   expect(context.github.issues.addLabels.mock.calls.length).toBe(1);
-  expect(context.github.issues.addLabels.mock.calls[0][0]).toStrictEqual('issue');
+  expect(context.github.issues.addLabels.mock.calls[0][0]).toStrictEqual(
+    "issue"
+  );
 });
 
 function createContext(labels) {
-  return { config: jest.fn(path => path === 'bot-files/labels.yml' ? labels : undefined), github: { issues: { addLabels: jest.fn(() => 'addlabel') } }, issue: jest.fn(() => 'issue') };
+  return {
+    config: jest.fn(path =>
+      path === "bot-files/labels.yml" ? labels : undefined
+    ),
+    github: { issues: { addLabels: jest.fn(() => "addlabel") } },
+    issue: jest.fn(() => "issue")
+  };
 }

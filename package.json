@@ -30,6 +30,10 @@
     "lint-final": "npm run prettier && npm run lint",
     "prepublish": "npm run lint && npm run test"
   },
+  "git-pre-hooks": {
+    "pre-commit": "npm run prettier",
+    "pre-push": "npm ci"
+  },
   "dependencies": {
     "fetch": "^1.1.0",
     "git-diff-parser": "^1.0.0",
@@ -42,12 +46,15 @@
   "devDependencies": {
     "eslint": "^7.5.0",
     "eslint-config-google": "^0.14.0",
+    "eslint-config-prettier": "^6.11.0",
     "eslint-config-standard": "^14.1.1",
     "eslint-plugin-import": "^2.22.0",
     "eslint-plugin-jest": "^23.19.0",
     "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^3.1.4",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
+    "git-pre-hooks": "^1.2.1",
     "jest": "^25.5.1",
     "lock-treatment-tool": "^0.4.1",
     "nock": "^12.0.0",

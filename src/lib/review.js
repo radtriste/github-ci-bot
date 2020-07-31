@@ -1,8 +1,8 @@
-const globToRegExp = require('glob-to-regexp');
-const { getChangedFiles } = require('./utils');
+const globToRegExp = require("glob-to-regexp");
+const { getChangedFiles } = require("./utils");
 
 async function askToReview(context) {
-  const reviewersInfo = await context.config('bot-files/reviewers.yml');
+  const reviewersInfo = await context.config("bot-files/reviewers.yml");
   context.github.pulls.createReviewRequest(
     context.issue({
       reviewers: await getPossibleReviewers(context, reviewersInfo)
@@ -13,11 +13,16 @@ async function askToReview(context) {
 async function getPossibleReviewers(context, reviewersInfo) {
   const changedFiles = await getChangedFiles(context);
   const pathReviewersSet = reviewersInfo.review
-    .filter(reviewPath => reviewPath.paths.map(path => globToRegExp(path)).find(re => changedFiles.find(file => re.test(file))))
+    .filter(reviewPath =>
+      reviewPath.paths
+        .map(path => globToRegExp(path))
+        .find(re => changedFiles.find(file => re.test(file)))
+    )
     .flatMap(pathReview => pathReview.reviewers)
     .reduce((acc, reviewer) => acc.add(reviewer), new Set());
 
-  return reviewersInfo.default.concat(Array.from(pathReviewersSet))
+  return reviewersInfo.default
+    .concat(Array.from(pathReviewersSet))
     .filter(reviewer => reviewer !== context.payload.pull_request.user.login);
 }
 
