@@ -10,7 +10,7 @@
       "email": "emingora@redhat.com"
     }
   ],
-  "license": "ISC",
+  "license": "SEE LICENSE IN LICENSE",
   "repository": "https://github.com/kiegroup/github-ci-bot.git",
   "homepage": "https://github.com/kiegroup/github-ci-bot",
   "bugs": "https://issues.redhat.com",
