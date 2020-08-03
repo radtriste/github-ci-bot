@@ -39,4 +39,4 @@ For more, check out the [Contributing Guide](CONTRIBUTING.md).
 
 ## License
 
-[ISC](LICENSE) © 2020 Tarun Khandelwal <tarkhand@redhat.com>
+[Apache 2.0](LICENSE) © 2020 Tarun Khandelwal <tarkhand@redhat.com>
