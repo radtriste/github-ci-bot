@@ -18,7 +18,7 @@ You need to create 4 files for this bot to work properly. For example on how to 
 
 You'll need to have these files inside `.github/bot-files/` directory in your project
 
-## Setup
+## Installation
 
 **Note**: node v12.18.0++ is required for this project.
 
@@ -30,6 +30,35 @@ npm install
 npm start
 ```
 **Note**: On the initial setup the bot creates a `.env` file in your project root which has all the secrets and webhook required for your bot to work with github. However you can create that file yourself. For that please see an example for the [file](docs/.env.example)
+
+After bot is running, it'll open a probot appilication on your `http://localhost:3000`, open the URL and follow the instruction to install the bot in your organization.
+
+After the installation is complete, you can close the `npm start` process. Notice the `.env` file is automatically created in your project root with all the required values. After this you start your bot with `npm run dev` which'll start the bot in the developement mode.
+
+### Running bot inside a container
+
+After the installation, you can run your bot inside a container.
+```sh
+# Build container image for bot
+docker build -t <preferred-tag-name> .
+
+# Run the bot
+docker run -d <preferred-tag-name>
+```
+
+### Running bot in Kubernetes/Openshift
+
+If you wish to run the bot on a Kubernetes platform, follow the steps.
+```sh
+# Build conatiner image for bot
+docker build -t <preferred-tag-name> .
+
+# Push image to a public repository
+docker push <preferred-tag-name>
+
+# Run bot with kubernetes imperitive command
+kubectl create deployment <your-bot-deployment-name> --image=<preferred-tag-name>
+```
 
 ## Contributing
 
