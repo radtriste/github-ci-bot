@@ -1,6 +1,6 @@
 FROM registry.access.redhat.com/ubi8/ubi
 
-ENV node_version=v12.18.2
+ARG node_version=v12.18.2
 
 RUN yum install xz python3 make -y
 
