@@ -41,3 +41,15 @@ test("is CI required false", async () => {
   // Assert
   expect(!result);
 });
+
+test("isCIRequired paths file not defined", async () => {
+  //Arrange
+  const context = {
+    config: jest.fn(() => undefined)
+  };
+  const diff_url = "whatever";
+  // Act
+  const result = await isCIRequired(context, diff_url);
+  // Assert
+  expect(!result);
+});
