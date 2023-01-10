@@ -42,7 +42,7 @@
     "js-yaml": "^3.14.0",
     "node-fetch": "^2.6.1",
     "parse-diff": "^0.7.0",
-    "probot": "^9.5.3",
+    "probot": "^12.2.9",
     "probot-commands": "^1.1.0"
   },
   "devDependencies": {
